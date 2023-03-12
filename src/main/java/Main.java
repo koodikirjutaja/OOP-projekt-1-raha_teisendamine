@@ -4,33 +4,32 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.util.Scanner;
 
 public class Main {
     private static final String API_KEY = "b32a153551f11c9aab47484d";
 
     public static void main(String[] args) throws IOException {
-        // Making Request
-        URL url = new URL("https://v6.exchangerate-api.com/v6/" + API_KEY + "/latest/USD");
-        HttpURLConnection request = (HttpURLConnection) url.openConnection();
-        request.connect();
+        // Get user input
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter currency code: ");
+        String currencyCode = scanner.nextLine();
 
-        // Convert to JSON
-        JsonParser jp = new JsonParser();
-        JsonElement root = jp.parse(new InputStreamReader((request.getInputStream())));
-        JsonObject jsonobj = root.getAsJsonObject();
+        // Construct URL
+        String url_sisse = "https://v6.exchangerate-api.com/v6/" + API_KEY + "/latest/" + currencyCode;
+
+        // Call rahaNetist function
+        String[] resultArray = rahaNetist(url_sisse);
+
+        // Convert result to JSON
+        JsonObject jsonobj = JsonParser.parseString(resultArray[0]).getAsJsonObject();
 
         // Accessing object
         String req_result = jsonobj.get("result").getAsString();
         System.out.println(req_result);
 
-        // Read JSON file
-        String data = new String(Files.readAllBytes(Paths.get("src/main/demo.json")));
-
-        // Parse JSON using Gson library
-        JsonObject jsonObject = JsonParser.parseString(data).getAsJsonObject();
-        JsonObject conversionRatesObject = jsonObject.getAsJsonObject("conversion_rates");
+        // Get conversion rates object
+        JsonObject conversionRatesObject = jsonobj.getAsJsonObject("conversion_rates");
         System.out.println(conversionRatesObject);
     }
 
@@ -49,6 +48,6 @@ public class Main {
         String req_result = jsonobj.get("result").getAsString();
 
         // Return result as an array of strings
-        return new String[] {req_result};
+        return new String[] {jsonobj.toString()};
     }
 }
