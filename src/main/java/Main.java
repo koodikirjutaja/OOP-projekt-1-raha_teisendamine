@@ -4,50 +4,62 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
+
+/*
+https://www.exchangerate-api.com/docs/java-currency-api
+https://www.youtube.com/watch?v=vL-yBY540c0
+https://blog.jetbrains.com/idea/2020/11/sharing-your-project-on-github/
+ */
 
 public class Main {
     private static final String API_KEY = "b32a153551f11c9aab47484d";
 
-    public static void main(String[] args) throws IOException {
-        // Get user input
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Enter currency code: ");
-        String currencyCode = scanner.nextLine();
-
-        // Construct URL
-        String url_sisse = "https://v6.exchangerate-api.com/v6/" + API_KEY + "/latest/" + currencyCode;
-
-        // Call rahaNetist function
-        String[] resultArray = rahaNetist(url_sisse);
-
-        // Convert result to JSON
-        JsonObject jsonobj = JsonParser.parseString(resultArray[0]).getAsJsonObject();
-
-        // Accessing object
-        String req_result = jsonobj.get("result").getAsString();
-        System.out.println(req_result);
-
-        // Get conversion rates object
-        JsonObject conversionRatesObject = jsonobj.getAsJsonObject("conversion_rates");
-        System.out.println(conversionRatesObject);
-    }
-
     public static String[] rahaNetist(String url_sisse) throws IOException {
-        // Making Request
+        // Teeb päringu
         URL url = new URL(url_sisse);
         HttpURLConnection request = (HttpURLConnection) url.openConnection();
         request.connect();
 
-        // Convert to JSON
+        // Konverteerib JSON-iks
         JsonParser jp = new JsonParser();
-        JsonElement root = jp.parse(new InputStreamReader((request.getInputStream())));
+        JsonElement root = jp.parse(new InputStreamReader((request.getInputStream()), StandardCharsets.UTF_8));
         JsonObject jsonobj = root.getAsJsonObject();
 
-        // Accessing object
-        String req_result = jsonobj.get("result").getAsString();
-
-        // Return result as an array of strings
+        // Tagastab tulemuse massiivina
         return new String[] {jsonobj.toString()};
     }
+
+    public static void main(String[] args) throws IOException {
+        // Saame kasutaja sisendi
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Sisesta valuuta kood: ");
+        String currencyCode = scanner.nextLine();
+
+        // Proovime päringuga kätte saada soovitud valuuta koodi
+        try {
+            // Konstrueerime URL-i
+            String url_sisse = "https://v6.exchangerate-api.com/v6/" + API_KEY + "/latest/" + currencyCode;
+
+            // Kutsume rahaNetist funktsiooni
+            String[] resultArray = rahaNetist(url_sisse);
+
+            // Konverteerime tulemuse JSON-iks
+            JsonObject jsonobj = JsonParser.parseString(resultArray[0]).getAsJsonObject();
+
+            // Ligipääs objektile
+            String req_result = jsonobj.get("result").getAsString();
+            System.out.println(req_result);
+
+            // Saame konverteerimiskursside objekti
+            JsonObject conversionRatesObject = jsonobj.getAsJsonObject("conversion_rates");
+            System.out.println(conversionRatesObject);
+
+            // Kui tegib error koodiga info kätte saamisel, anname kasutajale sellest teada
+        } catch(Exception FileNotFoundException){
+            System.out.println("Sellist valuuta koodi ei ole");
+        }
+    }
+
 }
