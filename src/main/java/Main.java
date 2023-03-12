@@ -11,25 +11,10 @@ import java.util.Scanner;
 https://www.exchangerate-api.com/docs/java-currency-api
 https://www.youtube.com/watch?v=vL-yBY540c0
 https://blog.jetbrains.com/idea/2020/11/sharing-your-project-on-github/
- */
+*/
 
-public class Main {
+public class Main extends RahaNetist {
     private static final String API_KEY = "b32a153551f11c9aab47484d";
-
-    public static String[] rahaNetist(String url_sisse) throws IOException {
-        // Teeb päringu
-        URL url = new URL(url_sisse);
-        HttpURLConnection request = (HttpURLConnection) url.openConnection();
-        request.connect();
-
-        // Konverteerib JSON-iks
-        JsonParser jp = new JsonParser();
-        JsonElement root = jp.parse(new InputStreamReader((request.getInputStream()), StandardCharsets.UTF_8));
-        JsonObject jsonobj = root.getAsJsonObject();
-
-        // Tagastab tulemuse massiivina
-        return new String[] {jsonobj.toString()};
-    }
 
     public static void main(String[] args) throws IOException {
         // Saame kasutaja sisendi
